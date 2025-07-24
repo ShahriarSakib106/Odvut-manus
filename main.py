@@ -52,7 +52,7 @@ message_limiter = MessageLimiter()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USERNAME = "@ShahriarSakib"
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID", "5512534898"))
-ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "6017730626")) # For old members
+ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "5512534898")) # For old members
 
 # Google Sheets Configuration
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "1r_zR236RAp-Pf1GduE--M89BM-I8wYlqOqMWj6ldiRI")
@@ -142,7 +142,7 @@ async def show_form(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     form_text = f"📝 *Admission Form*\n\nPlease fill out the form carefully with accurate information.\nAll fields are required for verification.\n\n[Click here to access the form]({FORM_URL})"
     await query.edit_message_text(form_text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton("✅ I\'ve Submitted", callback_data="back")],
+        [InlineKeyboardButton("✅ I\\'ve Submitted", callback_data="back")],
         [InlineKeyboardButton("🔙 Back", callback_data="back")]
     ]))
 
@@ -209,12 +209,22 @@ async def kyc_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def show_payment_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    member_type = "new_member" if "_new" in query.data else "old_member"
-    payment_text = "💳 *Payment Instructions*\n\n1. Complete your KYC verification first\n2. Payment methods available:\n   - Cryptocurrency (USDT)\n3. Contact admin for payment details\n\n" + f"Admin: {ADMIN_USERNAME}"
-    await query.edit_message_text(payment_text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton("🆔 Check KYC Status", callback_data=f"kyc_check_{member_type}")],
-        [InlineKeyboardButton("🔙 Back", callback_data="back")]
-    ]))
+    payment_text = (
+        "💳 *Payment Instructions*\n\n"
+        "1. Complete your KYC verification first\n"
+        "2. Payment methods available:\n"
+        "   - Cryptocurrency (USDT)\n"
+        "3. Contact admin for payment details\n\n"
+        f"Admin: {ADMIN_USERNAME}"
+    )
+    # Removed buttons from payment info
+    await query.edit_message_text(
+        payment_text,
+        parse_mode=ParseMode.MARKDOWN,
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Back", callback_data="back")]
+        ])
+    )
 
 async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -226,13 +236,35 @@ async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = query.from_user
         secret_code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
         context.user_data["payment_code"] = secret_code
-        user_message = f"✅ *Payment Verification*\n\n🔐 Your code: `{secret_code}`\n\nSend this to {ADMIN_USERNAME}"
-        admin_message = f"🆕 Payment Request from @{user.username}\n🔢 Code: `{secret_code}`\n🆔 User ID: {user.id}"
-        await query.edit_message_text(text=user_message, parse_mode=ParseMode.MARKDOWN_V2, reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔙 Back", callback_data="back")],
-            [InlineKeyboardButton("📞 Contact Admin", url=f"https://t.me/{ADMIN_USERNAME[1:]}")]
-        ]))
-        await context.bot.send_message(chat_id=admin_chat_id_to_use, text=admin_message, parse_mode=ParseMode.MARKDOWN_V2)
+
+        user_message = (
+            "✅ *Payment Verification*\n\n"
+            f"🔐 Your code: `{secret_code}`\n\n"
+            f"Send this to {ADMIN_USERNAME}"
+        )
+
+        admin_message = (
+            f"🆕 Payment Request from @{user.username}\n"
+            f"🔢 Code: `{secret_code}`\n"
+            f"🆔 User ID: {user.id}\n"
+            f"Member Type: {member_type.replace('_', ' ').title()}"
+        )
+
+        await query.edit_message_text(
+            text=user_message,
+            parse_mode=ParseMode.MARKDOWN_V2,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔙 Back", callback_data="back")],
+                [InlineKeyboardButton("📞 Contact Admin", url=f"https://t.me/{ADMIN_USERNAME[1:]}")]
+            ])
+        )
+        
+        await context.bot.send_message(
+            chat_id=admin_chat_id_to_use,
+            text=admin_message,
+            parse_mode=ParseMode.MARKDOWN_V2
+        )
+        
     except Exception as e:
         print(f"Payment error: {e}")
         await query.edit_message_text("⚠️ Payment processing failed. Please try again.")
@@ -283,7 +315,7 @@ async def handle_admin_reply(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if update.message.from_user.id not in [ADMIN_CHAT_ID, ADMIN_CHAT_ID_2]:
         return
     if "replying_to" not in context.user_data:
-        await update.message.reply_text("⚠️ No user selected to reply to. Use the reply button from a user\'s message.")
+        await update.message.reply_text("⚠️ No user selected to reply to. Use the reply button from a user\\'s message.")
         return
     user_id = context.user_data["replying_to"]
     reply_text = f"💬 Admin Reply:\n\n{update.message.text}"
@@ -304,6 +336,7 @@ async def forward_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     try:
         await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"📩 From @{update.message.from_user.username} (ID: {user_id}):\n\n{update.message.text}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📩 Reply", callback_data=f"reply_{user_id}")]]))
+        await context.bot.send_message(chat_id=ADMIN_CHAT_ID_2, text=f"📩 From @{update.message.from_user.username} (ID: {user_id}):\n\n{update.message.text}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📩 Reply", callback_data=f"reply_{user_id}")]]))
         await update.message.reply_text("✅ Message sent to admin!", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back to Menu", callback_data="back")]]))
     except Exception as e:
         print(f"Forwarding error: {e}")
@@ -338,7 +371,7 @@ async def return_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def show_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    help_text = "❓ *Help Center*\n\nFor any assistance, please contact our admin team.\n\n" + f"Admin: {ADMIN_USERNAME}\n" + "We\'re available to help you."
+    help_text = "❓ *Help Center*\n\nFor any assistance, please contact our admin team.\n\n" + f"Admin: {ADMIN_USERNAME}\n" + "We\\'re available to help you."
     await query.edit_message_text(help_text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup([
         [InlineKeyboardButton("📞 Contact Admin", callback_data="contact_admin")],
         [InlineKeyboardButton("🔙 Back", callback_data="back")]
