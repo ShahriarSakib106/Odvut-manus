@@ -197,8 +197,12 @@ async def kyc_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
         new_message = f"🔍 *KYC Status for* @{username}\n\n• Status: Not Verified\n• Reason: {status["reason"]}\n\nPlease complete verification again"
         new_buttons = [[InlineKeyboardButton("📝 Submit Verification", url=FORM_URL)], [InlineKeyboardButton("🔄 Refresh Status", callback_data=query.data)], [InlineKeyboardButton("🔙 Back", callback_data="back")]]
     else:
-        new_message = f"✅ *KYC Verified*\n\nCongratulations @{username}!\nYour account has been successfully verified."
-        new_buttons = [[InlineKeyboardButton("💳 Proceed to Payment", callback_data=f"payment_{member_type}")], [InlineKeyboardButton("🔙 Back", callback_data="back")]]
+    new_message = f"✅ *KYC Verified*\n\nCongratulations @{username}!\nYour account has been successfully verified."
+    new_buttons = [
+        [InlineKeyboardButton("💳 Proceed to Payment", 
+         callback_data=f"payment_{member_type}")],  # This now sends "payment_new_member" or "payment_old_member"
+        [InlineKeyboardButton("🔙 Back", callback_data="back")]
+    ]
 
     try:
         await query.edit_message_text(text=new_message, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(new_buttons))
