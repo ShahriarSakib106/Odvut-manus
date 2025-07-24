@@ -51,9 +51,9 @@ message_limiter = MessageLimiter()
 # --- Configuration ---
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USERNAME = "@ShahriarSakib"
-ADMIN_USERNAME_2 = "@ShahidulIslam42"
+ADMIN_USERNAME_2 = "@mohammadtajid03"
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID", "5512534898"))
-ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "6017730626")) # For old members
+ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "5319025828")) # For old members
 
 # Google Sheets Configuration
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "1r_zR236RAp-Pf1GduE--M89BM-I8wYlqOqMWj6ldiRI")
@@ -224,17 +224,26 @@ async def kyc_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def show_payment_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
+    # Determine member type from callback data
+    member_type = "new_member" if "_new" in query.data else "old_member"
+    
+    # Select appropriate admin contact
+    admin_contact = ADMIN_USERNAME if member_type == "new_member" else ADMIN_USERNAME_2
+    
     payment_text = (
         "💳 *Payment Instructions*\n\n"
         "1. Complete your KYC verification first\n"
         "2. Payment methods available:\n"
         "   - Cryptocurrency (USDT)\n"
+        "   - Binance\n"
+        "   - Mexc\n"
         "3. Contact admin for payment details\n\n"
-        f"Admin: {ADMIN_USERNAME}"
+        f"Admin: {admin_contact}"
     )
-    # Removed buttons from payment info
+    
     await query.edit_message_text(
-        payment_text,
+        text=payment_text,
         parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🔙 Back", callback_data="back")]
