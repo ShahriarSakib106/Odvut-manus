@@ -215,6 +215,7 @@ async def kyc_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=new_message,
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup(new_buttons)
+        )
     except Exception as e:
         print(f"KYC check error: {e}")
         await query.answer("⚠️ Could not update status")
