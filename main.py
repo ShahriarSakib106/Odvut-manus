@@ -229,6 +229,8 @@ async def show_payment_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    
+    # Extract member type correctly
     member_type = "new_member" if "_new" in query.data else "old_member"
     admin_chat_id_to_use = ADMIN_CHAT_ID if member_type == "new_member" else ADMIN_CHAT_ID_2
     
@@ -236,25 +238,25 @@ async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = query.from_user
         secret_code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
         context.user_data["payment_code"] = secret_code
-
+        
         user_message = (
             "✅ *Payment Verification*\n\n"
-            f"🔐 Your code: `{secret_code}`\n\n"
+            f"🔐 Your code: {secret_code}\n\n"
             f"Send this to {ADMIN_USERNAME}"
         )
-
+        
         admin_message = (
             f"🆕 Payment Request from @{user.username}\n"
-            f"🔢 Code: `{secret_code}`\n"
+            f"🔢 Code: {secret_code}\n"
             f"🆔 User ID: {user.id}\n"
-            f"Member Type: {member_type.replace('_', ' ').title()}"
+            f"👤 Member Type: {member_type.replace('_', ' ').title()}"
         )
 
         await query.edit_message_text(
             text=user_message,
             parse_mode=ParseMode.MARKDOWN_V2,
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔙 Back", callback_data="back")],
+                [InlineKeyboardButton("🔙 Back", callback_data=f"kyc_check_{member_type.split('_')[0]}")],
                 [InlineKeyboardButton("📞 Contact Admin", url=f"https://t.me/{ADMIN_USERNAME[1:]}")]
             ])
         )
