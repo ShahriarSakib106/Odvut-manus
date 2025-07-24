@@ -234,30 +234,20 @@ async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    # Extract member type correctly
-    member_type = "new_member" if "_new" in query.data else "old_member"
-    admin_chat_id_to_use = ADMIN_CHAT_ID if member_type == "new_member" else ADMIN_CHAT_ID_2
-    
     try:
+        # Extract full member type (new_member or old_member)
+        member_type = query.data.split('_', 1)[1]  # Splits on first underscore only
+        admin_chat_id = ADMIN_CHAT_ID if member_type == "new_member" else ADMIN_CHAT_ID_2
+        
         user = query.from_user
-        secret_code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
-        context.user_data["payment_code"] = secret_code
+        secret_code = ''.join(secrets.choice('ABCDEFGHJKLMNPQRSTUVWXYZ23456789') for _ in range(8))
         
-        user_message = (
-            "✅ *Payment Verification*\n\n"
-            f"🔐 Your code: {secret_code}\n\n"
-            f"Send this to {ADMIN_USERNAME}"
-        )
+        # Store code in user data
+        context.user_data['payment_code'] = secret_code
         
-        admin_message = (
-            f"🆕 Payment Request from @{user.username}\n"
-            f"🔢 Code: {secret_code}\n"
-            f"🆔 User ID: {user.id}\n"
-            f"👤 Member Type: {member_type.replace('_', ' ').title()}"
-        )
-
+        # User message
         await query.edit_message_text(
-            text=user_message,
+            text=f"✅ *Payment Verification*\n\n🔐 Your code: {secret_code}\n\nSend this to {ADMIN_USERNAME}",
             parse_mode=ParseMode.MARKDOWN_V2,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔙 Back", callback_data=f"kyc_check_{member_type.split('_')[0]}")],
@@ -265,15 +255,21 @@ async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ])
         )
         
+        # Admin message
         await context.bot.send_message(
-            chat_id=admin_chat_id_to_use,
-            text=admin_message,
+            chat_id=admin_chat_id,
+            text=f"🆕 Payment Request from @{user.username}\n🔢 Code: {secret_code}\n🆔 User ID: {user.id}\n👤 Type: {member_type.replace('_', ' ')}",
             parse_mode=ParseMode.MARKDOWN_V2
         )
         
     except Exception as e:
         print(f"Payment error: {e}")
-        await query.edit_message_text("⚠️ Payment processing failed. Please try again.")
+        await query.edit_message_text(
+            "⚠️ Payment processing failed. Please try again.",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("🔄 Try Again", callback_data=query.data)]
+            ])
+        )
 
 # --- Admin & Helper Functions ---
 async def contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -405,6 +401,7 @@ async def run_telegram_bot():
     app.add_handler(CallbackQueryHandler(kyc_check, pattern="^kyc_check_(new|old)$"))
     app.add_handler(CallbackQueryHandler(show_payment_info, pattern="^payment_info_(new|old)$"))
     app.add_handler(CallbackQueryHandler(handle_payment, pattern="^payment_(new|old)$"))
+    app.add_handler(CallbackQueryHandler(handle_payment, pattern="^payment_(new_member|old_member)$"))
     app.add_handler(CallbackQueryHandler(contact_admin, pattern="^contact_admin$"))
     app.add_handler(CallbackQueryHandler(show_help, pattern="^help$"))
     app.add_handler(CallbackQueryHandler(cancel_message, pattern="^cancel_message$"))
