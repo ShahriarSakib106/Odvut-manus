@@ -192,20 +192,29 @@ async def kyc_check(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if status["verified"] is None:
         new_message = "⏳ *KYC Status*\n\nYour verification is under review.\nPlease check back later."
-        new_buttons = [[InlineKeyboardButton("🔄 Refresh", callback_data=query.data)], [InlineKeyboardButton("🔙 Back", callback_data="back")]]
+        new_buttons = [
+            [InlineKeyboardButton("🔄 Refresh", callback_data=query.data)],
+            [InlineKeyboardButton("🔙 Back", callback_data="back")]
+        ]
     elif not status["verified"]:
-        new_message = f"🔍 *KYC Status for* @{username}\n\n• Status: Not Verified\n• Reason: {status["reason"]}\n\nPlease complete verification again"
-        new_buttons = [[InlineKeyboardButton("📝 Submit Verification", url=FORM_URL)], [InlineKeyboardButton("🔄 Refresh Status", callback_data=query.data)], [InlineKeyboardButton("🔙 Back", callback_data="back")]]
+        new_message = f"🔍 *KYC Status for* @{username}\n\n• Status: Not Verified\n• Reason: {status['reason']}\n\nPlease complete verification again"
+        new_buttons = [
+            [InlineKeyboardButton("📝 Submit Verification", url=FORM_URL)],
+            [InlineKeyboardButton("🔄 Refresh Status", callback_data=query.data)],
+            [InlineKeyboardButton("🔙 Back", callback_data="back")]
+        ]
     else:
-    new_message = f"✅ *KYC Verified*\n\nCongratulations @{username}!\nYour account has been successfully verified."
-    new_buttons = [
-        [InlineKeyboardButton("💳 Proceed to Payment", 
-         callback_data=f"payment_{member_type}")],  # This now sends "payment_new_member" or "payment_old_member"
-        [InlineKeyboardButton("🔙 Back", callback_data="back")]
-    ]
+        new_message = f"✅ *KYC Verified*\n\nCongratulations @{username}!\nYour account has been successfully verified."
+        new_buttons = [
+            [InlineKeyboardButton("💳 Proceed to Payment", callback_data=f"payment_{member_type}")],
+            [InlineKeyboardButton("🔙 Back", callback_data="back")]
+        ]
 
     try:
-        await query.edit_message_text(text=new_message, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(new_buttons))
+        await query.edit_message_text(
+            text=new_message,
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup(new_buttons)
     except Exception as e:
         print(f"KYC check error: {e}")
         await query.answer("⚠️ Could not update status")
