@@ -58,7 +58,7 @@ ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "5319025828")) # For old memb
 # Google Sheets Configuration
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "1r_zR236RAp-Pf1GduE--M89BM-I8wYlqOqMWj6ldiRI")
 SHEET_RANGES = {
-    "new_member": ["Sheet1!A:D", "Sheet2!A:D"],
+    "new_member": ["Sheet1!A:Q", "Sheet2!A:D"],
     "old_member": ["Sheet3!A:D"]
 }
 FORM_URL = os.getenv("FORM_URL", "https://forms.gle/YOUR_GOOGLE_FORM_LINK")
