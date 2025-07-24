@@ -51,9 +51,9 @@ message_limiter = MessageLimiter()
 # --- Configuration ---
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USERNAME = "@ShahriarSakib"
-ADMIN_USERNAME_2 = "@Shahriar106"
+ADMIN_USERNAME_2 = "@mohammadtajid03"
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID", "5512534898"))
-ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "7015657933")) # For old members
+ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "5319025828")) # For old members
 
 # Google Sheets Configuration
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "1r_zR236RAp-Pf1GduE--M89BM-I8wYlqOqMWj6ldiRI")
