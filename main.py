@@ -51,6 +51,7 @@ message_limiter = MessageLimiter()
 # --- Configuration ---
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USERNAME = "@ShahriarSakib"
+ADMIN_USERNAME_2 = "@ShahidulIslam42"
 ADMIN_CHAT_ID = int(os.getenv("ADMIN_CHAT_ID", "5512534898"))
 ADMIN_CHAT_ID_2 = int(os.getenv("ADMIN_CHAT_ID_2", "6017730626")) # For old members
 
@@ -257,18 +258,18 @@ async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # User message
         await query.edit_message_text(
-            text=f"✅ *Payment Verification*\n\n🔐 Your code: {secret_code}\n\nSend this to {ADMIN_USERNAME}",
-            parse_mode=ParseMode.MARKDOWN_V2,
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🔙 Back", callback_data=f"kyc_check_{member_type.split('_')[0]}")],
-                [InlineKeyboardButton("📞 Contact Admin", url=f"https://t.me/{ADMIN_USERNAME[1:]}")]
-            ])
+             text=f"✅ *Payment Verification*\n\n🔐 Your code: {secret_code}\n\nSend this to {ADMIN_USERNAME if member_type == 'new_member' else ADMIN_USERNAME_2}",
+             parse_mode=ParseMode.MARKDOWN_V2,
+             reply_markup=InlineKeyboardMarkup([
+                 [InlineKeyboardButton("🔙 Back", callback_data=f"kyc_check_{member_type.split('_')[0]}")],
+                 [InlineKeyboardButton("📞 Contact Admin", url=f"https://t.me/{(ADMIN_USERNAME if member_type == 'new_member' else ADMIN_USERNAME_2)[1:]}")]
+             ])
         )
         
         # Admin message
         await context.bot.send_message(
             chat_id=admin_chat_id,
-            text=f"🆕 Payment Request from @{user.username}\n🔢 Code: {secret_code}\n🆔 User ID: {user.id}\n👤 Type: {member_type.replace('_', ' ')}",
+            text=f"🆕 Payment Request from @{user.username}\n🔢 Code: `{secret_code}`\n🆔 User ID: {user.id}\n👤 Type: {member_type.replace('_', ' ')}",
             parse_mode=ParseMode.MARKDOWN_V2
         )
         
