@@ -258,7 +258,7 @@ async def handle_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # User message
         await query.edit_message_text(
-             text=f"✅ *Payment Verification*\n\n🔐 Your code: {secret_code}\n\nSend this to {ADMIN_USERNAME if member_type == 'new_member' else ADMIN_USERNAME_2}",
+             text=f"✅ *Payment Verification*\n\n🔐 Your code: `{secret_code}`\n\nSend this to {ADMIN_USERNAME if member_type == 'new_member' else ADMIN_USERNAME_2}",
              parse_mode=ParseMode.MARKDOWN_V2,
              reply_markup=InlineKeyboardMarkup([
                  [InlineKeyboardButton("🔙 Back", callback_data=f"kyc_check_{member_type.split('_')[0]}")],
